@@ -1435,7 +1435,7 @@ class GraphCurve(Graph):
         ax.plot(
             df.loc[("Сумма"), x],
             df.loc[("Сумма"), y],
-            label="Сумма",
+            label="Общая",
             linewidth=3,
             color="red",
         )
@@ -1659,7 +1659,6 @@ class GraphFH(GraphCurve):
     _ax_title_text = "Кривая площадей"
 
     def draw(self):
-        print(self.morfostvor)
         self.draw_curve(self.morfostvor, self.ax, "F", "УВ")
         # self.draw_water_levels(self.morfostvor, self.ax, "F", "УВ")
 
