@@ -1171,6 +1171,8 @@ class Morfostvor:
             self.fig_VH = GraphVH(self)
         if config.AREA_CURVE:
             self.fig_QF = GraphQF(self)
+        if config.AREA_FH_CURVE:
+            self.fig_FH = GraphFH(self)
 
         return df
 
@@ -1641,7 +1643,25 @@ class GraphVH(GraphCurve):
     def draw(self):
         self.draw_curve(self.morfostvor, self.ax, "V", "УВ")
         y_min = self.ax.get_ylim()[0]
-        self.draw_water_levels(self.morfostvor, self.ax, "V", "H", y_min=y_min)
+        # self.draw_water_levels(self.morfostvor, self.ax, "V", "H", y_min=y_min, )
+
+@dataclass
+class GraphFH(GraphCurve):
+    # Номер рисунка
+    _fig_num = 7
+    _fig_size = (16.5, 9)
+    fig: plt.figure = plt.figure(_fig_num, figsize=_fig_size)
+    ax: plt.subplot = fig.add_subplot(111)
+
+    # Подписи осей
+    _x_label_text = "F, м²"
+    _y_label_text = f"H, м{config.ALTITUDE_SYSTEM}"
+    _ax_title_text = "Кривая площадей"
+
+    def draw(self):
+        print(self.morfostvor)
+        self.draw_curve(self.morfostvor, self.ax, "F", "УВ")
+        # self.draw_water_levels(self.morfostvor, self.ax, "F", "УВ")
 
 
 @dataclass

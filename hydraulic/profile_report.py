@@ -159,13 +159,24 @@ def generate_morfostvor_report(morfostvor, out_filename, r=False):
             )
 
     if config.AREA_CURVE:
-        print("    — Вставляем график кривой площадей ... ", end="")
+        print("    — Вставляем график кривой площадей от расхода воды ... ", end="")
         insert_figure(doc, morfostvor.fig_QF.fig)
         print("успешно!")
 
         if config.GRAPHICS_TITLES_TEXT:
             doc.add_paragraph(
                 f"{config.STRING['figure']}{morfostvor.fig_QF._ax_title_text}",
+                style="Р-название",
+            )
+
+    if config.AREA_FH_CURVE:
+        print("    — Вставляем график кривой площадей от уровня ... ", end="")
+        insert_figure(doc, morfostvor.fig_FH.fig)
+        print("успешно!")
+
+        if config.GRAPHICS_TITLES_TEXT:
+            doc.add_paragraph(
+                f"{config.STRING['figure']}{morfostvor.fig_FH._ax_title_text}",
                 style="Р-название",
             )
 
