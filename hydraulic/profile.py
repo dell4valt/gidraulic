@@ -45,11 +45,11 @@ class ProfileSector:
     slope: float
     coord: tuple
 
-    consumption: float = np.NaN
-    depth: float = np.NaN
-    speed: float = np.NaN
-    area: float = np.NaN
-    width: float = np.NaN
+    consumption: float = np.nan
+    depth: float = np.nan
+    speed: float = np.nan
+    area: float = np.nan
+    width: float = np.nan
 
     def __post_init__(self):
         self.color = self.get_color()
@@ -830,7 +830,7 @@ class Morfostvor:
     def get_sectors_result(self):
         df = self.hydraulic_table.swaplevel(0, 1, axis=0)
         wl = self.levels_result.iloc[self.design_water_level_index]['H']
-        q, h, v, b, f = np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
+        q, h, v, b, f = np.nan, np.nan, np.nan, np.nan, np.nan
 
         result = pd.DataFrame(columns=[
             'name', 'slope', 'roughness', 'consumption',
@@ -866,7 +866,7 @@ class Morfostvor:
                     b = float(fB(wl))
                     f = float(fF(wl))
             except KeyError:
-                q, h, v, b, f = np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
+                q, h, v, b, f = np.nan, np.nan, np.nan, np.nan, np.nan
 
             row = {
                 'name': sector.name,
@@ -888,7 +888,7 @@ class Morfostvor:
             # Pandas: FutureWarning concatenation with empty or all-NA entries is deprecated
             result.dropna(axis=1, how='all', inplace=True)
             result = pd.concat([result, pd.DataFrame.from_records([row])], ignore_index=True)
-            q, h, v, b, f = np.NaN, np.NaN, np.NaN, np.NaN, np.NaN
+            q, h, v, b, f = np.nan, np.nan, np.nan, np.nan, np.nan
 
         # Подбираем параметры суммирующей кривой
         sum_text = 'Сумма'
@@ -907,8 +907,8 @@ class Morfostvor:
 
         sum_row = {
             'name': "Все участки",
-            'slope': np.NaN,
-            'roughness': np.NaN,
+            'slope': np.nan,
+            'roughness': np.nan,
             'consumption': q,
             'depth': h,
             'speed': v,
@@ -1779,7 +1779,7 @@ class GraphProfile(Graph):
                 x_mid = x1 - ((x1 - x) / 2)
                 # Подписи коэффициентов шероховатости по участкам
                 value = getattr(sector, parameter)
-                if value is np.NaN:
+                if value is np.nan:
                     value = 0
                 try:
                     self.ax_bottom.text(

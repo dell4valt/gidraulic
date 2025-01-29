@@ -225,7 +225,7 @@ def generate_morfostvor_report(morfostvor, out_filename, r=False):
     # Вывод таблицы участков
     print("    — Записываем таблицу участков ... ", end="")
     # Заменяем пустые значения на прочерк и добавляем номер участка
-    df_sectors = morfostvor.sectors_result.replace(np.NaN, '-')
+    df_sectors = morfostvor.sectors_result.replace(np.nan, '-')
     df_sectors.insert(loc=0, column='N', value=df_sectors.index + 1)
 
     prob_text = text_sanitize(
