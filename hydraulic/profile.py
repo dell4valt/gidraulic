@@ -5,6 +5,7 @@ import time
 import typing
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import ClassVar, Dict, List
 
 import matplotlib
 import matplotlib.patheffects as path_effects
@@ -128,39 +129,46 @@ class SituationSector:
     start_point: int
     end_point: int
 
-    def get_color(self):
-        s = self.type.strip().lower()
+    COLOR_MAPPING: ClassVar[Dict[str, str]] = {
+        'grass': 'honeydew',
+        'concrete': 'gainsboro',
+        'field': 'burlywood',
+        'wood': 'limegreen',
+        'water': 'deepskyblue',
+        'sand': 'lemonchiffon',
+        'gravel': 'tan',
+        'reed': 'cadetblue',
+        'bush': 'darkkhaki',
+    }
 
-        grass = ['трава', 'луг', 'газон']
-        concrete = ['бетон', 'асфальт']
-        field = ['пашня', 'поле']
-        reed = ['камыш', 'кам', 'кам.', 'осока']
-        wood = ['лес', 'редкий лес', 'поросль']
-        bush = ['кустарник', 'кусты']
-        water = ['вода', 'ув', 'протока', 'ручей']
-        sand = ['песок']
-        gravel = ['гравий', 'галька', 'аллювий']
+    CATEGORIES: ClassVar[Dict[str, List[str]]] = {
+        'grass': ['трава', 'луг', 'газон'],
+        'concrete': ['бетон', 'асфальт'],
+        'field': ['пашня', 'поле'],
+        'reed': ['камыш', 'кам', 'кам.', 'осока'],
+        'wood': ['лес', 'редкий лес', 'поросль'],
+        'bush': ['кустарник', 'кусты'],
+        'water': ['вода', 'ув', 'протока', 'ручей'],
+        'sand': ['песок'],
+        'gravel': ['гравий', 'галька', 'аллювий'],
+    }
 
-        if s in grass:
-            return 'honeydew'
-        elif s in concrete:
-            return 'gainsboro'
-        elif s in field:
-            return 'burlywood'
-        elif s in wood:
-            return 'limegreen'
-        elif s in water:
-            return 'deepskyblue'
-        elif s in sand:
-            return 'lemonchiffon'
-        elif s in gravel:
-            return 'tan'
-        elif s in reed:
-            return 'cadetblue'
-        elif s in bush:
-            return 'darkkhaki'
-        else:
-            return 'white'
+    def get_color(self) -> str:
+        """Возвращает цвет сектора на основе его типа.
+        
+        Returns:
+            str: Название цвета в CSS-формате или 'white' если тип не распознан
+        """
+        normalized_type = self._normalize_type(self.type)
+        
+        for category, keywords in self.CATEGORIES.items():
+            if normalized_type in keywords:
+                return self.COLOR_MAPPING[category]
+        return 'white'
+
+    def _normalize_type(self, type_str: str) -> str:
+        """Приводит строку типа к стандартному виду для сравнения"""
+        return type_str.strip().lower()
 
 
 @dataclass
