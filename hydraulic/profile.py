@@ -27,7 +27,7 @@ from hydraulic.profile_report import generate_morfostvor_report
 
 @dataclass
 class ProfileSector:
-    """Класс участка профиля (пойма, русло и т.д.)
+    """Класс участка профиля (пойма, русло и т.д.).
 
     :param id: Номер участка
     :param name: Описание (название) участка
@@ -35,7 +35,7 @@ class ProfileSector:
     :param end_point: Номер последней точки участка
     :param roughness: Коэффициент шероховатости n
     :param slope: Уклон данного участка I, ‰
-    :param coord: Кортеж с двумя подсписками координат x и y участка
+    :param coord: Кортеж с двумя списками координат (x и y) участка
     """
 
     id: int
@@ -44,82 +44,69 @@ class ProfileSector:
     end_point: int
     roughness: float
     slope: float
-    coord: tuple
+    coord: tuple[list[float], list[float]]
 
-    consumption: float = np.nan
-    depth: float = np.nan
-    speed: float = np.nan
-    area: float = np.nan
-    width: float = np.nan
+    consumption: float = field(default=np.nan)
+    depth: float = field(default=np.nan)
+    speed: float = field(default=np.nan)
+    area: float = field(default=np.nan)
+    width: float = field(default=np.nan)
+    color: list[float] = field(init=False)
 
     def __post_init__(self):
         self.color = self.get_color()
-        if not self.__check_type():
-            print('Программа будет завершена.\n')
-            sys.exit(35)
+        self.__validate_types()
 
-    def get_color(self):
-        name = self.name
-        channel = re.findall("русло", name, flags=re.IGNORECASE)
-        protoka = re.findall("протока", name, flags=re.IGNORECASE)
-        # floodplain = re.findall('пойма', name, flags=re.IGNORECASE)
+    def get_color(self) -> list[float]:
+        """Определяет цвет участка в зависимости от его типа."""
+        name_lower = self.name.lower()
 
-        if channel:
-            color = [0, 0.5, 1]
-        elif protoka:
-            color = [0, np.random.uniform(0, 0.5), np.random.uniform(0.5, 1)]
-        # elif floodplain:
-        # color = [np.random.uniform(.3, 1), 0, 0]
-        else:
-            color = [
-                np.random.uniform(0, 1),
-                np.random.uniform(0, 1),
-                np.random.uniform(0, 1),
-            ]
-        return color
+        if "русло" in name_lower:
+            return [0, 0.5, 1]
+        elif "протока" in name_lower:
+            return [0, np.random.uniform(0, 0.5), np.random.uniform(0.5, 1)]
+        elif "пойма" in name_lower:
+            return [np.random.uniform(0.3, 1), 0, 0]
 
-    def get_length(self):
+        return np.random.uniform(0, 1, 3).tolist()
+
+    @property
+    def length(self) -> float:
         return round(self.coord[0][-1] - self.coord[0][0], 3)
 
-    def __check_type(self):
-        result = True
-        for field_name, field_def in self.__dataclass_fields__.items():
-            if isinstance(field_def.type, typing._SpecialForm):
-                # No check for typing.Any, typing.Union, typing.ClassVar (without parameters)
-                continue
-            try:
-                actual_type = field_def.type.__origin__
-            except AttributeError:
-                # In case of non-typing types (such as <class 'int'>, for instance)
-                actual_type = field_def.type
-            # In Python 3.8 one would replace the try/except with
-            # actual_type = typing.get_origin(field_def.type) or field_def.type
-            if isinstance(actual_type, typing._SpecialForm):
-                # case of typing.Union[…] or typing.ClassVar[…]
-                actual_type = field_def.type.__args__
+    def __validate_types(self):
+        """Проверяет соответствие типов атрибутов."""
+        expected_types = {
+            "id": int,
+            "name": str,
+            "start_point": int,
+            "end_point": int,
+            "roughness": float,
+            "slope": float,
+            "coord": tuple,
+        }
 
-            actual_value = getattr(self, field_name)
-            if not isinstance(actual_value, actual_type):
-                print()
-                print()
+        for field_name, expected_type in expected_types.items():
+            value = getattr(self, field_name)
 
-                keys = {
-                    'slope': 'уклоны',
-                    'roughness': 'коэффициенты шероховатости',
+            if not isinstance(value, expected_type):
+                type_map = {
+                    int: "целое число",
+                    float: "десятичное число",
+                    str: "строка",
+                    list: "список",
+                    tuple: "кортеж"
                 }
 
-                types = {
-                    'str': 'строка',
-                    'int': 'целое число',
-                    'float': 'десятичное число',
-                    'list': 'список'
-                }
+                readable_name = {
+                    "slope": "уклон",
+                    "roughness": "коэффициент шероховатости",
+                }.get(field_name, field_name)
 
-                print(f"Внимание! Ошибка типа данных в исходных параметрах — {keys[field_name]}:"
-                      "{types[type(actual_value).__name__]}, "
-                      "вместо {types[field_def.type.__name__]}.")
-                result = False
-        return result
+                raise TypeError(
+                    f"Ошибка типа данных: {readable_name} должен быть '{type_map[expected_type]}', "
+                    f"но получено '{type_map[type(value)]}' ({value})."
+                )
 
 
 @dataclass
@@ -742,8 +729,6 @@ class Morfostvor:
                     x[sector.start_point: sector.end_point + 1],
                     y[sector.start_point: sector.end_point + 1],
                 )  # Координаты из начальной и конечной точек
-                # Длины полученные из разницы координат по x
-                sector.length = sector.get_length()
 
             try:
                 # Максимальная отметка участка слева
@@ -756,7 +741,7 @@ class Morfostvor:
                     print(sector)
 
                 print("Завершаем программу.")
-                sys.exit(3)
+                raise SystemExit
 
             print(f"успешно, найдено {len(sectors)} участка.")
             return sectors
